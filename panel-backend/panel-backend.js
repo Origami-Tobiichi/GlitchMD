@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8000;
 // Middleware
 app.use(cors({
     origin: [
-        'https://your-koyeb-app.koyeb.app', // Ganti dengan domain Koyeb Anda
+        'https://gastric-ferdinanda-takamiyaryuuzak71-53a6ccec.koyeb.app/', // Ganti dengan domain Koyeb Anda
         'http://localhost:3000',
         '*'
     ],
@@ -154,4 +154,5 @@ module.exports = {
     setPhoneNumber: (number) => { global.phoneNumber = number; },
     setPairingCode: (code) => { global.pairingCode = code; },
     setBotInfo: (info) => { global.botInfo = info; }
+
 };
