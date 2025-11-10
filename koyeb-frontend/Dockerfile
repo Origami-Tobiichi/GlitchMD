@@ -1,9 +1,9 @@
 FROM node:18-alpine
 
-WORKDIR /app/koyeb-frontend
+WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY koyeb-frontend/package*.json ./
 RUN npm install --production
 
 # Copy source code
@@ -19,3 +19,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 CMD ["npm", "start"]
+
