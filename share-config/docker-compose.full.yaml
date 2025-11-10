@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  koyeb-frontend:
+    build: ../koyeb-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://panel-backend:8000
+      - KOYEB_API_KEY=${KOYEB_API_KEY}
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - panel-backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  panel-backend:
+    build: ../panel-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=./database
+      - SESSION_PATH=./sessions
+    restart: unless-stopped
+    volumes:
+      - ../panel-backend/database:/app/database
+      - ../panel-backend/media:/app/media
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: whatsapp-bot-network

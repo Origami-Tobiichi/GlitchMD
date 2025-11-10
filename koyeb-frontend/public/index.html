@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot - Koyeb Frontend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="notificationArea"></div>
+
+    <div class="container py-4">
+        <div class="dashboard-card text-center mb-4">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="https://cdn.pixabay.com/photo/2021/08/27/22/33/whatsapp-6579607_960_720.png" class="bot-avatar">
+                </div>
+                <div class="col">
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp Bot
+                        <span class="badge bg-success ms-2">
+                            <i class="fas fa-shield-alt me-1"></i>Koyeb Frontend
+                        </span>
+                    </h1>
+                    <p class="lead text-muted mb-3">Integrated System with Panel Backend</p>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <small class="text-muted">Frontend: <span class="badge bg-primary">Koyeb</span></small>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Backend: <span class="badge bg-success">Panel</span></small>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Status: <span id="connectionStatus">Loading...</span></small>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Port: <span id="currentPort">3000</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="dashboard-card">
+                    <h4><i class="fas fa-plug me-2"></i>Connection Status</h4>
+                    <div class="connection-info">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="status-indicator" id="statusIndicator"></span>
+                                <strong id="statusText">Loading...</strong>
+                            </div>
+                            <span class="badge bg-secondary" id="statusBadge">Initializing...</span>
+                        </div>
+                        <div id="phoneInfo" class="alert alert-info">
+                            <i class="fas fa-phone me-2"></i>
+                            <span id="phoneText">No phone connected</span>
+                        </div>
+                        <div id="pairingInfo" style="display: none;" class="alert alert-warning text-center">
+                            <strong><i class="fas fa-key me-2"></i>Pairing Code</strong>
+                            <div class="pairing-code mt-2" id="pairingCodeDisplay">XXXXXX</div>
+                            <small class="text-muted">Enter this code in WhatsApp Linked Devices</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="dashboard-card">
+                    <h4><i class="fas fa-tachometer-alt me-2"></i>Quick Actions</h4>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button id="connectBtn" class="btn btn-primary w-100">
+                                <i class="fas fa-link me-2"></i>Connect
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button id="refreshBtn" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-sync me-2"></i>Refresh
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button id="clearSessionBtn" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-2"></i>Clear Session
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button id="restartBtn" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-redo me-2"></i>Restart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card mt-3">
+                    <h4><i class="fas fa-server me-2"></i>System Info</h4>
+                    <div class="system-info">
+                        <div class="row">
+                            <div class="col-6">
+                                <small><strong>Frontend:</strong> Koyeb</small>
+                            </div>
+                            <div class="col-6">
+                                <small><strong>Backend:</strong> Panel</small>
+                            </div>
+                            <div class="col-6">
+                                <small><strong>API Status:</strong> <span id="apiStatus">Checking...</span></small>
+                            </div>
+                            <div class="col-6">
+                                <small><strong>Last Update:</strong> <span id="lastUpdate">-</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card mt-4">
+            <h4><i class="fas fa-network-wired me-2"></i>Integration Status</h4>
+            <div class="integration-status">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-cloud fa-2x text-primary mb-2"></i>
+                            <h5>Koyeb Frontend</h5>
+                            <span class="badge bg-success" id="frontendStatus">Operational</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-server fa-2x text-success mb-2"></i>
+                            <h5>Panel Backend</h5>
+                            <span class="badge bg-success" id="backendStatus">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-plug fa-2x text-info mb-2"></i>
+                            <h5>Connection</h5>
+                            <span class="badge bg-success" id="integrationStatus">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

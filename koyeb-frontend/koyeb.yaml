@@ -1,0 +1,26 @@
+name: whatsapp-bot-frontend
+services:
+  - name: frontend
+    ports:
+      - port: 3000
+        protocol: HTTP
+    routes:
+      - path: /
+    env:
+      - key: BACKEND_URL
+        value: "https://mypanelraja.punyagwituiniwaduh.my.id"
+      - key: KOYEB_API_KEY
+        value: "zzk3hg68nuqafhoezbco6ckz15dzm4tvvekij4g202cow4oxufe5gv843yywfxx9"
+      - key: NODE_ENV
+        value: "production"
+    scaler:
+      min: 1
+      max: 3
+    health_checks:
+      - path: /health
+        port: 3000
+        protocol: HTTP
+        interval: 60s
+        timeout: 30s
+    instance:
+      type: nano

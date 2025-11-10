@@ -1,0 +1,31 @@
+{
+  "name": "whatsapp-bot-panel-backend",
+  "version": "2.0.0",
+  "description": "Backend for WhatsApp Bot with Panel integration",
+  "main": "panel-backend.js",
+  "scripts": {
+    "start": "node panel-backend.js",
+    "start-bot": "node index.js",
+    "dev": "nodemon panel-backend.js",
+    "dev-bot": "nodemon index.js",
+    "start-integrated": "node panel-backend.js & node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@whiskeysockets/baileys": "^6.4.0",
+    "qrcode-terminal": "^0.12.0",
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "pino": "^8.15.0",
+    "node-cache": "^5.1.2"
+  },
+  "keywords": [
+    "whatsapp-bot",
+    "panel",
+    "backend",
+    "integrated"
+  ],
+  "author": "Nazedev",
+  "license": "MIT"
+}
