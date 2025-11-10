@@ -43,6 +43,48 @@
             </div>
         </div>
 
+        <!-- TAMBAHKAN WHATSAPP CONNECTION SECTION INI -->
+        <div class="dashboard-card mb-4">
+            <h4><i class="fas fa-mobile-alt me-2"></i>WhatsApp Connection</h4>
+            <div id="connectionSection">
+                <form id="phoneForm">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">WhatsApp Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">+</span>
+                                    <input type="tel" class="form-control border-start-0" id="phoneInput" 
+                                           placeholder="6281234567890 or 081234567890" required>
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Enter your phone number in any format
+                                </div>
+                                <div class="phone-examples mt-2">
+                                    <small class="text-muted">
+                                        <strong>Accepted formats:</strong><br>
+                                        <code>6281234567890</code> (International)<br>
+                                        <code>081234567890</code> (Local Indonesia)<br>
+                                        <code>1234567890</code> (US)<br>
+                                        <code>441234567890</code> (UK)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-end h-100">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="submitBtn">
+                                    <i class="fas fa-paper-plane me-2"></i>Start Connection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="formMessage"></div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6">
                 <div class="dashboard-card">
@@ -55,7 +97,7 @@
                             </div>
                             <span class="badge bg-secondary" id="statusBadge">Initializing...</span>
                         </div>
-                        <div id="phoneInfo" class="alert alert-info">
+                        <div id="phoneInfo" class="alert alert-info" style="display: none;">
                             <i class="fas fa-phone me-2"></i>
                             <span id="phoneText">No phone connected</span>
                         </div>
@@ -63,6 +105,12 @@
                             <strong><i class="fas fa-key me-2"></i>Pairing Code</strong>
                             <div class="pairing-code mt-2" id="pairingCodeDisplay">XXXXXX</div>
                             <small class="text-muted">Enter this code in WhatsApp Linked Devices</small>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Expires in <span id="countdown" class="fw-bold">30</span> seconds
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
