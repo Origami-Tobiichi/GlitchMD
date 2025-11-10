@@ -3,6 +3,7 @@ class WhatsAppBotFrontend {
         this.backendUrl = window.location.origin;
         this.updateInterval = null;
         this.isConnected = false;
+        this.pairingCountdown = null;
         
         this.initializeApp();
     }
@@ -14,10 +15,172 @@ class WhatsAppBotFrontend {
     }
 
     bindEvents() {
+        // Event untuk form submit
+        document.getElementById('phoneForm').addEventListener('submit', (e) => this.handleFormSubmit(e));
+        
+        // Event untuk tombol lainnya
         document.getElementById('refreshBtn').addEventListener('click', () => this.updateStatus());
-        document.getElementById('connectBtn').addEventListener('click', () => this.startConnection());
         document.getElementById('clearSessionBtn').addEventListener('click', () => this.clearSession());
         document.getElementById('restartBtn').addEventListener('click', () => this.restartBot());
+        
+        // Tombol connect lama (fallback)
+        document.getElementById('connectBtn').addEventListener('click', () => this.showPhoneForm());
+    }
+
+    // Handle form submit untuk nomor telepon
+    async handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const phoneInput = document.getElementById('phoneInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const formMessage = document.getElementById('formMessage');
+        const phone = phoneInput.value.trim();
+        
+        if (!phone) {
+            formMessage.innerHTML = '<div class="alert alert-danger">Please enter a phone number</div>';
+            return;
+        }
+        
+        const cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length < 8) {
+            formMessage.innerHTML = '<div class="alert alert-danger">Phone number must be at least 8 digits</div>';
+            return;
+        }
+        
+        // Disable button dan show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div> Processing...';
+        formMessage.innerHTML = '';
+        
+        try {
+            const response = await fetch('/api/pair', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ phoneNumber: phone })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                formMessage.innerHTML = '<div class="alert alert-success">Phone number accepted! Starting WhatsApp connection...</div>';
+                this.showNotification('Phone number accepted! Starting connection...', 'success');
+                
+                // Sembunyikan form setelah berhasil
+                document.getElementById('connectionSection').style.display = 'none';
+                
+            } else if (result.status === 'rate_limited') {
+                formMessage.innerHTML = '<div class="alert alert-warning">Too many attempts. Please wait before trying again.</div>';
+                this.showNotification(result.message, 'warning');
+            } else {
+                formMessage.innerHTML = '<div class="alert alert-danger">Error: ' + (result.message || result.error) + '</div>';
+            }
+            
+        } catch (error) {
+            formMessage.innerHTML = '<div class="alert alert-danger">Network error: Could not connect to server</div>';
+            console.error('Connection error:', error);
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Start Connection';
+        }
+    }
+
+    // Fallback untuk tombol connect lama
+    showPhoneForm() {
+        const connectionSection = document.getElementById('connectionSection');
+        connectionSection.style.display = 'block';
+        document.getElementById('phoneInput').focus();
+    }
+
+    // Update UI dengan data dari backend
+    updateUI(data) {
+        // Update connection status
+        document.getElementById('connectionStatus').textContent = data.connection_status || 'unknown';
+        document.getElementById('statusText').textContent = data.connection_status || 'unknown';
+        document.getElementById('statusBadge').textContent = data.connection_status || 'unknown';
+        
+        // Update status indicator
+        const indicator = document.getElementById('statusIndicator');
+        indicator.className = `status-indicator status-${data.connection_status || 'offline'}`;
+        
+        // Update phone info
+        const phoneInfo = document.getElementById('phoneInfo');
+        const phoneText = document.getElementById('phoneText');
+        
+        if (data.phone_number) {
+            phoneText.textContent = `Connected: +${data.phone_number}`;
+            phoneInfo.style.display = 'block';
+            // Sembunyikan form connection jika sudah ada nomor
+            document.getElementById('connectionSection').style.display = 'none';
+        } else {
+            phoneText.textContent = 'No phone connected';
+            phoneInfo.style.display = 'block';
+            // Tampilkan form connection jika belum ada nomor
+            document.getElementById('connectionSection').style.display = 'block';
+        }
+        
+        // Update pairing info
+        const pairingInfo = document.getElementById('pairingInfo');
+        if (data.pairing_code) {
+            document.getElementById('pairingCodeDisplay').textContent = data.pairing_code;
+            pairingInfo.style.display = 'block';
+            this.startPairingCountdown();
+        } else {
+            pairingInfo.style.display = 'none';
+            this.stopPairingCountdown();
+        }
+        
+        // Update system info
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        document.getElementById('apiStatus').textContent = 'Connected';
+        document.getElementById('apiStatus').className = 'text-success';
+        
+        // Update badge colors berdasarkan status
+        this.updateStatusBadge(data.connection_status);
+    }
+
+    // Countdown untuk pairing code
+    startPairingCountdown() {
+        this.stopPairingCountdown();
+        
+        let countdown = 30;
+        const countdownElement = document.getElementById('countdown');
+        
+        this.pairingCountdown = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                this.stopPairingCountdown();
+                this.showNotification('Pairing code expired', 'warning');
+            }
+        }, 1000);
+    }
+
+    stopPairingCountdown() {
+        if (this.pairingCountdown) {
+            clearInterval(this.pairingCountdown);
+            this.pairingCountdown = null;
+        }
+    }
+
+    // Update warna badge berdasarkan status
+    updateStatusBadge(status) {
+        const badge = document.getElementById('statusBadge');
+        const statusColors = {
+            'online': 'bg-success',
+            'offline': 'bg-danger',
+            'connecting': 'bg-warning',
+            'pairing': 'bg-info',
+            'initializing': 'bg-secondary'
+        };
+        
+        // Remove all status classes
+        badge.className = 'badge';
+        // Add appropriate class
+        badge.classList.add(statusColors[status] || 'bg-secondary');
     }
 
     async updateStatus() {
@@ -35,39 +198,43 @@ class WhatsAppBotFrontend {
         }
     }
 
-    updateUI(data) {
-        // Update connection status
-        document.getElementById('connectionStatus').textContent = data.connection_status || 'unknown';
-        document.getElementById('statusText').textContent = data.connection_status || 'unknown';
-        document.getElementById('statusBadge').textContent = data.connection_status || 'unknown';
-        
-        // Update status indicator
-        const indicator = document.getElementById('statusIndicator');
-        indicator.className = `status-indicator status-${data.connection_status || 'offline'}`;
-        
-        // Update phone info
-        const phoneInfo = document.getElementById('phoneText');
-        if (data.phone_number) {
-            phoneInfo.textContent = `Connected: +${data.phone_number}`;
-            document.getElementById('phoneInfo').style.display = 'block';
-        } else {
-            phoneInfo.textContent = 'No phone connected';
-            document.getElementById('phoneInfo').style.display = 'block';
+    async clearSession() {
+        if (!confirm('Are you sure you want to clear the session? This will require re-authentication.')) {
+            return;
         }
         
-        // Update pairing info
-        const pairingInfo = document.getElementById('pairingInfo');
-        if (data.pairing_code) {
-            document.getElementById('pairingCodeDisplay').textContent = data.pairing_code;
-            pairingInfo.style.display = 'block';
-        } else {
-            pairingInfo.style.display = 'none';
+        try {
+            const response = await fetch('/api/clear-session', {
+                method: 'POST'
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                this.showNotification('Session cleared successfully', 'success');
+                // Tampilkan kembali form connection
+                document.getElementById('connectionSection').style.display = 'block';
+                this.updateStatus();
+            } else {
+                this.showNotification('Failed to clear session', 'danger');
+            }
+            
+        } catch (error) {
+            this.showNotification('Error clearing session', 'danger');
+        }
+    }
+
+    async restartBot() {
+        if (!confirm('Restart the bot?')) {
+            return;
         }
         
-        // Update system info
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
-        document.getElementById('apiStatus').textContent = 'Connected';
-        document.getElementById('apiStatus').className = 'text-success';
+        this.showNotification('Restart command sent...', 'warning');
+    }
+
+    validatePhoneNumber(phone) {
+        const cleanPhone = phone.replace(/\D/g, '');
+        return cleanPhone.length >= 8 && cleanPhone.length <= 15;
     }
 
     updateIntegrationStatus(isConnected) {
@@ -87,77 +254,6 @@ class WhatsAppBotFrontend {
             backendStatus.className = 'badge bg-danger';
             this.isConnected = false;
         }
-    }
-
-    async startConnection() {
-        const phoneNumber = prompt('Enter your WhatsApp number (e.g., 6281234567890):');
-        
-        if (!phoneNumber) return;
-        
-        if (!this.validatePhoneNumber(phoneNumber)) {
-            this.showNotification('Invalid phone number format', 'danger');
-            return;
-        }
-        
-        try {
-            const response = await fetch('/api/pair', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ phoneNumber })
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                this.showNotification('Pairing process started!', 'success');
-                this.updateStatus();
-            } else {
-                this.showNotification(result.error || 'Failed to start pairing', 'danger');
-            }
-            
-        } catch (error) {
-            this.showNotification('Error starting pairing process', 'danger');
-        }
-    }
-
-    async clearSession() {
-        if (!confirm('Are you sure you want to clear the session? This will require re-authentication.')) {
-            return;
-        }
-        
-        try {
-            const response = await fetch('/api/clear-session', {
-                method: 'POST'
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                this.showNotification('Session cleared successfully', 'success');
-                this.updateStatus();
-            } else {
-                this.showNotification('Failed to clear session', 'danger');
-            }
-            
-        } catch (error) {
-            this.showNotification('Error clearing session', 'danger');
-        }
-    }
-
-    async restartBot() {
-        if (!confirm('Restart the bot?')) {
-            return;
-        }
-        
-        this.showNotification('Restart command sent...', 'warning');
-        // Note: You might want to implement a restart endpoint in the backend
-    }
-
-    validatePhoneNumber(phone) {
-        const cleanPhone = phone.replace(/\D/g, '');
-        return cleanPhone.length >= 8 && cleanPhone.length <= 15;
     }
 
     startAutoUpdate() {
@@ -207,5 +303,12 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden && window.whatsappBot) {
         window.whatsappBot.updateStatus();
+    }
+});
+
+// Cleanup pada page unload
+window.addEventListener('beforeunload', function() {
+    if (window.whatsappBot && window.whatsappBot.pairingCountdown) {
+        window.whatsappBot.stopPairingCountdown();
     }
 });
