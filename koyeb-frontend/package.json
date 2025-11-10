@@ -2,10 +2,10 @@
   "name": "whatsapp-bot-koyeb-frontend",
   "version": "2.0.0",
   "description": "Frontend for WhatsApp Bot deployed on Koyeb - Integrated System",
-  "main": "koyeb-frontend.js",
+  "main": "./koyeb-frontend/koyeb-frontend.js",
   "scripts": {
-    "start": "node koyeb-frontend.js",
-    "dev": "nodemon koyeb-frontend.js",
+    "start": "node ./koyeb-frontend/koyeb-frontend.js",
+    "dev": "nodemon ./koyeb-frontend/koyeb-frontend.js",
     "build": "echo 'Frontend build completed'",
     "test": "echo 'No tests specified'"
   },
@@ -25,4 +25,5 @@
   ],
   "author": "Nazedev",
   "license": "MIT"
+
 }
