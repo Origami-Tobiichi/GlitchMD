@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Konfigurasi
-const BACKEND_URL = process.env.BACKEND_URL || 'https://mypanelraja.punyagwituiniwaduh.my.id';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://takamiya.netlify.app';
 const KOYEB_API_KEY = process.env.KOYEB_API_KEY || 'zzk3hg68nuqafhoezbco6ckz15dzm4tvvekij4g202cow4oxufe5gv843yywfxx9';
 
 // Middleware
@@ -184,4 +184,5 @@ app.listen(PORT, () => {
     console.log(`🔗 Backend: ${BACKEND_URL}`);
     console.log(`🌐 Dashboard: http://localhost:${PORT}`);
     console.log(`❤️  Health: http://localhost:${PORT}/health`);
+
 });
