@@ -3,20 +3,13 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY koyeb-frontend/package*.json ./
+COPY package*.json ./
 RUN npm install --production
 
 # Copy source code
 COPY . .
 
-# Create public directory
-RUN mkdir -p public
-
+# Expose port (sesuaikan dengan aplikasi Anda)
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
-
-CMD ["npm", "start"]
-
+CMD [ "npm", "start" ]
